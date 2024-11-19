@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Stefan Armbruster <stefan@armbruster-it.de>"]
 readme = "README.md"
-package-mode = false
+# package-mode = false   # requires poetry >= 1.8
 
 [tool.poetry.dependencies]
 python = "^3.12"
