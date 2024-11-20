@@ -52,9 +52,7 @@ def main():
     csv = s.post("https://www.bms-fw.bayern.de/Navigation/Public/LastMinute.aspx", data=hidden_values)
     if (csv.status_code != 200):
         raise RuntimeError("Error: Could not fetch csv")    
-    csv_lines = csv.text.splitlines()
-    for line in csv_lines[:10]:
-        print(line)
+    print(csv.text)
 
 if __name__ == "__main__":
     main()
