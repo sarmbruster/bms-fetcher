@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 
 from bs4 import BeautifulSoup
-import requests
-import logging
+import requests, re
+# import logging
 
-# These two lines enable debugging at httplib level (requests->urllib3->http.client)
-# You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
-# The only thing missing will be the response.body which is not logged.
-try:
-    import http.client as http_client
-except ImportError:
-    # Python 2
-    import httplib as http_client
-import re
-http_client.HTTPConnection.debuglevel = 1
+# # These two lines enable debugging at httplib level (requests->urllib3->http.client)
+# # You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
+# # The only thing missing will be the response.body which is not logged.
+# try:
+#     import http.client as http_client
+# except ImportError:
+#     # Python 2
+#     import httplib as http_client
+# import re
+# http_client.HTTPConnection.debuglevel = 1
 
-# You must initialize logging, otherwise you'll not see debug output.
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.propagate = True
+# # You must initialize logging, otherwise you'll not see debug output.
+# logging.basicConfig()
+# logging.getLogger().setLevel(logging.DEBUG)
+# requests_log = logging.getLogger("requests.packages.urllib3")
+# requests_log.setLevel(logging.DEBUG)
+# requests_log.propagate = True
 
 def main():
     s = requests.Session()
@@ -34,8 +34,8 @@ def main():
     html = BeautifulSoup(r.content, "html.parser")
     hidden_inputs = html.find_all("input", type="hidden")
     hidden_values = {input_tag.get("name"): input_tag.get("value") for input_tag in hidden_inputs}
-    #hidden_values["__EVENTTARGET"] ='ctl00$ctl00$CM$CM$CtrlCourses$CtrlCoursesList$CtrlGrid$ctl11$ctl09'
 
+    # extract __EVENTTARGET from 'Export' link
     export_link = html.find("a", string="Export")
     if export_link:
         href = export_link.get("href")
@@ -47,8 +47,8 @@ def main():
     else:
         raise RuntimeError("Error: Could not find export link")
 
-    for key, value in hidden_values.items():
-        print(f"{key}: {value}")    
+    # for key, value in hidden_values.items():
+    #     print(f"{key}: {value}")    
     csv = s.post("https://www.bms-fw.bayern.de/Navigation/Public/LastMinute.aspx", data=hidden_values)
     if (csv.status_code != 200):
         raise RuntimeError("Error: Could not fetch csv")    
