@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 
 from bs4 import BeautifulSoup
-import requests, re
-# import logging
+import requests, re, sys
+import logging
 
-# # These two lines enable debugging at httplib level (requests->urllib3->http.client)
-# # You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
-# # The only thing missing will be the response.body which is not logged.
-# try:
-#     import http.client as http_client
-# except ImportError:
-#     # Python 2
-#     import httplib as http_client
-# import re
-# http_client.HTTPConnection.debuglevel = 1
+# These two lines enable debugging at httplib level (requests->urllib3->http.client)
+# You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
+# The only thing missing will be the response.body which is not logged.
+try:
+    import http.client as http_client
+except ImportError:
+    # Python 2
+    import httplib as http_client
 
-# # You must initialize logging, otherwise you'll not see debug output.
-# logging.basicConfig()
-# logging.getLogger().setLevel(logging.DEBUG)
-# requests_log = logging.getLogger("requests.packages.urllib3")
-# requests_log.setLevel(logging.DEBUG)
-# requests_log.propagate = True
+# You must initialize logging, otherwise you'll not see debug output.
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
+
+# Redirect http.client debug output to stderr
+http_client.HTTPConnection.debuglevel = 1
+http_client.print = lambda *args: sys.stderr.write(" ".join(str(arg) for arg in args) + "\n")
 
 def main():
     s = requests.Session()
@@ -47,6 +48,9 @@ def main():
             csv = s.post("https://www.bms-fw.bayern.de/Navigation/Public/LastMinute.aspx", data=hidden_values)
             if (csv.status_code != 200):
                 raise RuntimeError("Error: Could not fetch csv")    
+            # The server sends cp1250 (Central European) encoded content
+            # Explicitly decode to ensure proper handling of German characters
+            csv.encoding = 'cp1250'
             print(csv.text)
 
         else:
