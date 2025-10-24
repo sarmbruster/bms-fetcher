@@ -47,10 +47,13 @@ def main():
             #     print(f"{key}: {value}")    
             csv = s.post("https://www.bms-fw.bayern.de/Navigation/Public/LastMinute.aspx", data=hidden_values)
             if (csv.status_code != 200):
-                raise RuntimeError("Error: Could not fetch csv")    
+                raise RuntimeError("Error: Could not fetch csv")
+
+
             # The server sends cp1250 (Central European) encoded content
             # Explicitly decode to ensure proper handling of German characters
             csv.encoding = 'cp1250'
+            logging.info(f"CSV response: status_code={csv.status_code}, encoding={csv.encoding}, content_length={len(csv.content)}")
             print(csv.text)
 
         else:
