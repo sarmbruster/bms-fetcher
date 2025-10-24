@@ -42,17 +42,18 @@ def main():
         match = re.search(r"__doPostBack\('([^']+)'", href)
         if match:
             hidden_values["__EVENTTARGET"] = match.group(1)
+            # for key, value in hidden_values.items():
+            #     print(f"{key}: {value}")    
+            csv = s.post("https://www.bms-fw.bayern.de/Navigation/Public/LastMinute.aspx", data=hidden_values)
+            if (csv.status_code != 200):
+                raise RuntimeError("Error: Could not fetch csv")    
+            print(csv.text)
+
         else:
             raise RuntimeError("Error: Could not extract __EVENTTARGET from href")
     else:
-        raise RuntimeError("Error: Could not find export link")
-
-    # for key, value in hidden_values.items():
-    #     print(f"{key}: {value}")    
-    csv = s.post("https://www.bms-fw.bayern.de/Navigation/Public/LastMinute.aspx", data=hidden_values)
-    if (csv.status_code != 200):
-        raise RuntimeError("Error: Could not fetch csv")    
-    print(csv.text)
+        print("Error: Could not find export link")
+        #raise RuntimeError("Error: Could not find export link")
 
 if __name__ == "__main__":
     main()
