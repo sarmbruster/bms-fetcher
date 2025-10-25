@@ -49,10 +49,10 @@ def main():
             if (csv.status_code != 200):
                 raise RuntimeError("Error: Could not fetch csv")
 
-
-            # The server sends cp1250 (Central European) encoded content
-            # Explicitly decode to ensure proper handling of German characters
-            csv.encoding = 'cp1250'
+            # The server sends windows-1252 (Western European) encoded content
+            # This encoding properly handles German umlauts (ü, ö, ä, ß)
+            # Note: charset_normalizer may detect cp1250, but windows-1252 is correct
+            csv.encoding = 'windows-1252'
             logging.info(f"CSV response: status_code={csv.status_code}, encoding={csv.encoding}, content_length={len(csv.content)}")
             print(csv.text)
 
